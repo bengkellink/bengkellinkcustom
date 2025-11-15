@@ -1,6 +1,116 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <!DOCTYPE html>
+<html>
+<head>
+    <title>Custom Link Redirector</title>
+    <script>
+        // DAFTAR SHORT CODE & URL TUJUAN
+        const linkMap = {
+            'HOSTING_MURAH': 'https://contoh-link-hosting-murah.com',
+            'TUTORIAL': 'https://example.com/tutorial',
+            'CONTACT': 'https://example.com/contact'
+            // Tambahkan short code lain di sini
+        };
+
+        // FUNGSI REDIRECT OTOMATIS
+        function handleRedirect() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const goParam = urlParams.get('go');
+            
+            if (goParam && linkMap[goParam]) {
+                // Redirect ke URL tujuan
+                window.location.href = linkMap[goParam];
+            } else if (goParam) {
+                // Tampilkan error jika short code tidak ditemukan
+                document.getElementById('error-message').textContent = 
+                    `Short code "${goParam}" tidak terdaftar.`;
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+
+        // JALANKAN SAAT HALAMAN DIMUAT
+        window.onload = handleRedirect;
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .error {
+            display: none;
+            background: rgba(255,0,0,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Custom Link Redirect</h1>
+        <p>Service pemendek link custom</p>
+        
+        <div id="error" class="error">
+            <h2>❌ URL Tidak Ditemukan</h2>
+            <p id="error-message">Short code tidak terdaftar.</p>
+            <a href="/" class="btn">Kembali</a>
+        </div>
+
+        <div id="success" style="display:none;">
+            <p>Redirecting...</p>
+        </div>
+        
+        <div id="home">
+            <h3>Short Codes Tersedia:</h3>
+            <div id="link-list">
+                <!-- Daftar link akan di-generate oleh JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // TAMPILKAN DAFTAR SHORT CODE YANG ADA
+        function displayAvailableLinks() {
+            const linkList = document.getElementById('link-list');
+            let html = '';
+            
+            for (const [code, url] of Object.entries(linkMap)) {
+                html += `<p><a href="/?go=${code}" class="btn">${code}</a> → ${url}</p>`;
+            }
+            
+            linkList.innerHTML = html;
+        }
+        
+        // Jalankan setelah halaman dimuat
+        window.onload = function() {
+            handleRedirect();
+            displayAvailableLinks();
+        };
+    </script>
+</body>
+</html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bengkel Link Custom</title>
