@@ -3,83 +3,725 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bengkel Link - URL Shortener</title>
+    <title>Bengkel Link Custom</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        :root {
+            --primary: #4361ee; --secondary: #3f37c9; --success: #4cc9f0; --info: #4895ef; 
+            --warning: #f72585; --light: #f8f9fa; --dark: #212529; --gray: #6c757d;
+            --sidebar: #2d3748; --sidebar-hover: #4a5568;
         }
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f5f7fb; color: var(--dark); min-height: 100vh; }
+        
+        /* Login Styles */
+        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem; }
+        .login-box { background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            padding: 2.5rem; width: 100%; max-width: 400px; }
+        .login-header { text-align: center; margin-bottom: 2rem; }
+        .login-header h1 { color: var(--primary); font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .login-form .form-group { margin-bottom: 1.5rem; }
+        .login-form label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        .login-form input { width: 100%; padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 8px; 
+            font-size: 1rem; transition: border-color 0.3s; }
+        .login-form input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67,97,238,0.2); }
+        .login-btn { background: var(--primary); color: white; border: none; padding: 0.75rem 1.5rem; 
+            border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.3s; width: 100%; }
+        .login-btn:hover { background: var(--secondary); }
+        
+        /* App Styles */
+        .app-container { display: none; flex-direction: column; min-height: 100vh; }
+        .app-header { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 1rem 2rem; 
+            display: flex; justify-content: space-between; align-items: center; }
+        .app-title { display: flex; align-items: center; gap: 0.75rem; }
+        .app-title h1 { color: var(--primary); font-size: 1.5rem; }
+        .user-menu { display: flex; align-items: center; gap: 1rem; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); 
+            display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+        .logout-btn { background: none; border: 1px solid var(--gray); color: var(--gray); padding: 0.5rem 1rem; 
+            border-radius: 6px; cursor: pointer; transition: all 0.3s; }
+        .logout-btn:hover { background: #f8f9fa; border-color: var(--primary); color: var(--primary); }
+        
+        .app-body { display: flex; flex: 1; }
+        .sidebar { width: 250px; background: var(--sidebar); color: white; transition: all 0.3s; 
+            height: calc(100vh - 80px); position: sticky; top: 0; overflow-y: auto; }
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid #4a5568; display: flex; align-items: center; gap: 0.75rem; }
+        .menu-item { padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; 
+            cursor: pointer; transition: background 0.3s; }
+        .menu-item:hover, .menu-item.active { background: var(--sidebar-hover); }
+        
+        .main-content { flex: 1; padding: 2rem; width: calc(100% - 250px); }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .card-title { font-size: 1.25rem; font-weight: 600; color: var(--dark); }
+        
+        .url-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; margin-bottom: 1.5rem; }
+        .form-group { display: flex; flex-direction: column; }
+        label { margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
+        input { padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; transition: border 0.3s; }
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67,97,238,0.2); }
+        
+        button { background: var(--primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; 
+            font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.3s; 
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        button:hover { background: var(--secondary); }
+        .btn-success { background: var(--success); }
+        .btn-success:hover { background: #3aa8d0; }
+        .btn-warning { background: var(--warning); }
+        .btn-warning:hover { background: #e01a6f; }
+        
+        .result { background: var(--light); padding: 1.5rem; border-radius: 8px; margin-top: 1.5rem; display: none; }
+        .short-url { display: flex; margin-bottom: 1rem; }
+        .short-url input { flex: 1; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+        .copy-btn { width: auto; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+        
+        .url-list { margin-top: 2rem; }
+        .url-item { background: var(--light); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; 
+            display: flex; justify-content: space-between; align-items: center; }
+        .url-info { flex: 1; }
+        .url-info .original { font-weight: 600; margin-bottom: 0.25rem; word-break: break-all; }
+        .url-info .short { color: var(--primary); font-weight: 500; }
+        .url-stats { display: flex; gap: 1rem; margin-top: 0.5rem; }
+        .stat { display: flex; align-items: center; gap: 0.25rem; font-size: 0.9rem; color: var(--gray); }
+        .url-actions { display: flex; gap: 0.5rem; }
+        .action-btn { padding: 0.5rem 1rem; width: auto; font-size: 0.9rem; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .stat-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; 
+            justify-content: center; margin-bottom: 1rem; font-size: 1.5rem; }
+        .stat-value { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .stat-label { color: var(--gray); font-size: 0.9rem; }
+        
+        .chart-container { height: 300px; margin-bottom: 2rem; }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: var(--light); font-weight: 600; }
+        tr:hover { background: #f8fafc; }
+        
+        .badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; color: var(--dark); cursor: pointer; }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: block; }
+            .sidebar { transform: translateX(-100%); position: fixed; height: 100vh; top: 0; z-index: 1000; }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { width: 100%; }
+            .url-form { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .url-item { flex-direction: column; align-items: flex-start; }
+            .url-actions { margin-top: 1rem; width: 100%; }
+            .action-btn { flex: 1; }
         }
-        h1 {
-            color: #4361ee;
-            margin-bottom: 10px;
-        }
-        .success {
-            color: #10b981;
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-        .test-links {
-            margin-top: 30px;
-            text-align: left;
-        }
-        .test-links a {
-            display: block;
-            padding: 10px;
-            margin: 5px 0;
-            background: #f8f9fa;
-            border-radius: 5px;
-            text-decoration: none;
-            color: #4361ee;
-            transition: background 0.3s;
-        }
-        .test-links a:hover {
-            background: #e9ecef;
+        @media (max-width: 576px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .app-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .user-menu { align-self: flex-end; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="success">✅</div>
-        <h1>GitHub Pages WORK!</h1>
-        <p>Jika ini terlihat, berarti HTML berhasil di-render!</p>
-        
-        <div class="test-links">
-            <h3>Test URL Shortener:</h3>
-            <a href="?go=google">?go=google → Google.com</a>
-            <a href="?go=github">?go=github → GitHub.com</a>
-            <a href="?go=test">?go=test → Example.com</a>
+    <!-- Login Page -->
+    <div class="login-container" id="loginPage">
+        <div class="login-box">
+            <div class="login-header">
+                <h1><i class="fas fa-link"></i> Bengkel Link</h1>
+                <p>Masuk untuk mengakses dashboard</p>
+            </div>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Masukkan username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Masukkan password" required>
+                </div>
+                <button type="submit" class="login-btn">Masuk</button>
+            </form>
+            <div class="login-footer">
+                <p>Hanya user terdaftar yang dapat mengakses</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app-container" id="appContainer">
+        <div class="app-header">
+            <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+            <div class="app-title">
+                <i class="fas fa-link"></i>
+                <h1>Bengkel Link Custom</h1>
+            </div>
+            <div class="user-menu">
+                <div class="user-info">
+                    <div class="avatar">AD</div>
+                    <span>Admin</span>
+                </div>
+                <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Keluar</button>
+            </div>
+        </div>
+
+        <div class="app-body">
+            <!-- Sidebar -->
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <i class="fas fa-link"></i>
+                    <h2>Bengkel Link</h2>
+                </div>
+                <div class="sidebar-menu">
+                    <div class="menu-item active" data-target="dashboard"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></div>
+                    <div class="menu-item" data-target="shortener"><i class="fas fa-plus-circle"></i><span>Shorten URL</span></div>
+                    <div class="menu-item" data-target="analytics"><i class="fas fa-chart-bar"></i><span>Analytics</span></div>
+                    <div class="menu-item" data-target="history"><i class="fas fa-history"></i><span>Click History</span></div>
+                    <div class="menu-item" data-target="settings"><i class="fas fa-cog"></i><span>Settings</span></div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Dashboard -->
+                <div class="content-section active" id="dashboard">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: #e0f2fe; color: #0369a1;"><i class="fas fa-link"></i></div>
+                            <div class="stat-value" id="totalUrls">12</div>
+                            <div class="stat-label">Total URL</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: #f0fdf4; color: #16a34a;"><i class="fas fa-mouse"></i></div>
+                            <div class="stat-value" id="totalClicks">1,248</div>
+                            <div class="stat-label">Total Klik</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: #fef7cd; color: #ca8a04;"><i class="fas fa-users"></i></div>
+                            <div class="stat-value" id="uniqueVisitors">842</div>
+                            <div class="stat-label">Pengunjung Unik</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: #fae8ff; color: #c026d3;"><i class="fas fa-chart-line"></i></div>
+                            <div class="stat-value" id="clickRate">4.2%</div>
+                            <div class="stat-label">Rasio Klik</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">URL Terpopuler</h2>
+                            <button class="btn-success"><i class="fas fa-download"></i> Export</button>
+                        </div>
+                        <div id="popularUrls"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Aktivitas Klik 7 Hari Terakhir</h2>
+                        </div>
+                        <div class="chart-container"><canvas id="clickChart"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- URL Shortener -->
+                <div class="content-section" id="shortener">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Persingkat URL Baru</h2>
+                        </div>
+                        <div class="url-form">
+                            <div class="form-group">
+                                <label for="original-url">URL Asli</label>
+                                <input type="url" id="original-url" placeholder="https://example.com/very-long-url" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="custom-slug">Custom Slug (Opsional)</label>
+                                <input type="text" id="custom-slug" placeholder="nama-custom">
+                            </div>
+                            <button id="shorten-btn"><i class="fas fa-compress-alt"></i> Persingkat</button>
+                        </div>
+                        <div class="result" id="result">
+                            <h3>URL Pendek Berhasil Dibuat!</h3>
+                            <div class="short-url">
+                                <input type="text" id="short-url-output" readonly>
+                                <button class="copy-btn" id="copy-btn"><i class="fas fa-copy"></i> Salin</button>
+                            </div>
+                            <p><strong>Note:</strong> Untuk membuat URL publik yang bisa diakses semua orang, tambahkan manual ke PUBLIC_URLS di kode.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">URL yang Telah Dipersingkat</h2>
+                        </div>
+                        <div class="url-list" id="urls-container"></div>
+                    </div>
+                </div>
+
+                <!-- Analytics -->
+                <div class="content-section" id="analytics">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Analisis Klik</h2>
+                            <div>
+                                <button class="btn-success"><i class="fas fa-calendar"></i> 7 Hari</button>
+                                <button><i class="fas fa-download"></i> Laporan</button>
+                            </div>
+                        </div>
+                        <div class="chart-container"><canvas id="analyticsChart"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Statistik Perangkat</h2>
+                        </div>
+                        <div class="chart-container"><canvas id="deviceChart"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="content-section" id="history">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Riwayat Klik</h2>
+                            <button><i class="fas fa-filter"></i> Filter</button>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr><th>Waktu</th><th>URL</th><th>IP</th><th>Lokasi</th><th>Perangkat</th><th>Browser</th></tr>
+                                </thead>
+                                <tbody id="clickHistoryTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div class="content-section" id="settings">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Pengaturan</h2>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label for="domain">Domain Custom</label>
+                            <input type="text" id="domain" placeholder="short.domain.com">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label for="api-key">API Key</label>
+                            <input type="text" id="api-key" value="sk_123456789abcdef">
+                        </div>
+                        <button class="btn-success" style="width: auto;"><i class="fas fa-save"></i> Simpan</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Simple redirect system
-        const urlParams = new URLSearchParams(window.location.search);
-        const slug = urlParams.get('go');
-        
-        const urlDatabase = {
+        // ==================== KONFIGURASI ====================
+        const USER_CREDENTIALS = { username: 'admin', password: 'admin123' };
+        const AUTH_KEY = 'urlShortenerAuth';
+        const STORAGE_KEY = 'shortenedUrls';
+        const CLICKS_KEY = 'urlClicks';
+        const ANALYTICS_KEY = 'analyticsData';
+
+        // DATABASE URL PUBLIK - TAMBAHIN MANUAL DI SINI!
+        const PUBLIC_URLS = {
             'google': 'https://google.com',
-            'github': 'https://github.com', 
+            'github': 'https://github.com',
+            'youtube': 'https://youtube.com',
             'test': 'https://example.com'
+            // 👆 TAMBAHIN URL LAIN DI SINI!
         };
-        
-        if (slug && urlDatabase[slug]) {
-            window.location.href = urlDatabase[slug];
+
+        let clickChart, analyticsChart, deviceChart;
+
+        // ==================== AUTH SYSTEM ====================
+        function checkAuth() { return localStorage.getItem(AUTH_KEY) === 'true'; }
+        function login(username, password) {
+            if (username === USER_CREDENTIALS.username && password === USER_CREDENTIALS.password) {
+                localStorage.setItem(AUTH_KEY, 'true'); return true;
+            } return false;
         }
+        function logout() { localStorage.removeItem(AUTH_KEY); showLoginPage(); }
+        function showLoginPage() {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('appContainer').style.display = 'none';
+        }
+        function showApp() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'flex';
+            initializeApp();
+        }
+
+        // ==================== REDIRECT SYSTEM ====================
+        function handleRedirect() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const slug = urlParams.get('go');
+            
+            if (slug && PUBLIC_URLS[slug]) {
+                // Track click untuk URL publik
+                recordClickForPublicUrl(slug);
+                // Redirect
+                window.location.href = PUBLIC_URLS[slug];
+                return true;
+            } else if (slug) {
+                document.body.innerHTML = `
+                    <div style="text-align:center; padding:2rem; font-family:Arial;">
+                        <h1 style="color:#e74c3c;">URL Tidak Ditemukan</h1>
+                        <p>Short code <strong>${slug}</strong> tidak terdaftar.</p>
+                        <a href="${window.location.origin}${window.location.pathname}">Kembali</a>
+                    </div>
+                `;
+                return true;
+            }
+            return false;
+        }
+
+        // ==================== DATA MANAGEMENT ====================
+        function generateDemoData() {
+            if (!localStorage.getItem(STORAGE_KEY)) {
+                const urls = [
+                    { id: '1', originalUrl: 'https://example.com/blog/web-development', slug: 'webdev', 
+                      shortUrl: `${window.location.origin}${window.location.pathname}?go=webdev`, 
+                      createdAt: new Date().toISOString(), clicks: 342 },
+                    { id: '2', originalUrl: 'https://example.com/products/special', slug: 'special', 
+                      shortUrl: `${window.location.origin}${window.location.pathname}?go=special`, 
+                      createdAt: new Date().toISOString(), clicks: 218 }
+                ];
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(urls));
+            }
+            if (!localStorage.getItem(CLICKS_KEY)) {
+                localStorage.setItem(CLICKS_KEY, JSON.stringify([]));
+            }
+            if (!localStorage.getItem(ANALYTICS_KEY)) {
+                const analytics = { totalClicks: 1248, uniqueVisitors: 842, clickRate: '4.2%',
+                    clicksLast7Days: [45, 52, 38, 65, 72, 48, 56] };
+                localStorage.setItem(ANALYTICS_KEY, JSON.stringify(analytics));
+            }
+        }
+
+        function getUrls() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+        function getClicks() { return JSON.parse(localStorage.getItem(CLICKS_KEY) || '[]'); }
+        function getAnalytics() { return JSON.parse(localStorage.getItem(ANALYTICS_KEY) || '{}'); }
+        function saveUrls(urls) { localStorage.setItem(STORAGE_KEY, JSON.stringify(urls)); }
+        function saveClicks(clicks) { localStorage.setItem(CLICKS_KEY, JSON.stringify(clicks)); }
+
+        // ==================== URL SHORTENER ====================
+        function generateRandomSlug(length = 6) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            return Array.from({length}, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+        }
+
+        function shortenUrl(originalUrl, customSlug = '') {
+            const urls = getUrls();
+            
+            try { new URL(originalUrl); } catch (e) { throw new Error('URL tidak valid'); }
+            
+            let slug = customSlug.trim();
+            if (!slug) slug = generateRandomSlug();
+            
+            if (!/^[a-zA-Z0-9_-]+$/.test(slug)) throw new Error('Slug hanya boleh huruf, angka, - dan _');
+            if (urls.some(url => url.slug === slug)) throw new Error('Slug sudah digunakan');
+            
+            const shortUrl = `${window.location.origin}${window.location.pathname}?go=${slug}`;
+            const newUrl = {
+                id: Date.now().toString(), originalUrl, slug, shortUrl,
+                createdAt: new Date().toISOString(), clicks: 0
+            };
+            
+            urls.unshift(newUrl);
+            saveUrls(urls);
+            return newUrl;
+        }
+
+        // ==================== CLICK TRACKING ====================
+        function recordClick(urlId) {
+            const clicks = getClicks();
+            const urls = getUrls();
+            const urlIndex = urls.findIndex(url => url.id === urlId);
+            
+            if (urlIndex !== -1) {
+                urls[urlIndex].clicks += 1;
+                saveUrls(urls);
+            }
+            
+            const locations = ['Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Yogyakarta'];
+            const devices = ['Mobile', 'Desktop', 'Tablet'];
+            const browsers = ['Chrome', 'Firefox', 'Safari', 'Edge'];
+            
+            const newClick = {
+                id: Date.now().toString(), urlId, timestamp: new Date().toISOString(),
+                ip: `192.168.1.${Math.floor(Math.random() * 100) + 1}`,
+                location: locations[Math.floor(Math.random() * locations.length)],
+                device: devices[Math.floor(Math.random() * devices.length)],
+                browser: browsers[Math.floor(Math.random() * browsers.length)]
+            };
+            
+            clicks.unshift(newClick);
+            saveClicks(clicks);
+            return newClick;
+        }
+
+        function recordClickForPublicUrl(slug) {
+            const clicks = getClicks();
+            const urls = getUrls();
+            const analytics = getAnalytics();
+            
+            let urlIndex = urls.findIndex(url => url.slug === slug);
+            if (urlIndex === -1) {
+                const newUrl = {
+                    id: `public_${slug}`, originalUrl: PUBLIC_URLS[slug], slug: slug,
+                    shortUrl: `${window.location.origin}${window.location.pathname}?go=${slug}`,
+                    createdAt: new Date().toISOString(), clicks: 0
+                };
+                urls.unshift(newUrl);
+                urlIndex = 0;
+            }
+            
+            urls[urlIndex].clicks += 1;
+            saveUrls(urls);
+            
+            const locations = ['Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Yogyakarta'];
+            const devices = ['Mobile', 'Desktop', 'Tablet'];
+            const browsers = ['Chrome', 'Firefox', 'Safari', 'Edge'];
+            
+            const newClick = {
+                id: Date.now().toString(), urlId: urls[urlIndex].id,
+                timestamp: new Date().toISOString(),
+                ip: `192.168.1.${Math.floor(Math.random() * 100) + 1}`,
+                location: locations[Math.floor(Math.random() * locations.length)],
+                device: devices[Math.floor(Math.random() * devices.length)],
+                browser: browsers[Math.floor(Math.random() * browsers.length)]
+            };
+            
+            clicks.unshift(newClick);
+            saveClicks(clicks);
+            
+            analytics.totalClicks += 1;
+            localStorage.setItem(ANALYTICS_KEY, JSON.stringify(analytics));
+        }
+
+        // ==================== UI RENDERING ====================
+        function renderUrlList() {
+            const urlsContainer = document.getElementById('urls-container');
+            const urls = getUrls();
+            
+            if (urls.length === 0) {
+                urlsContainer.innerHTML = '<p style="text-align:center; color:var(--gray); padding:2rem;">Belum ada URL</p>';
+                return;
+            }
+            
+            urlsContainer.innerHTML = urls.map(url => `
+                <div class="url-item">
+                    <div class="url-info">
+                        <div class="original">${url.originalUrl}</div>
+                        <div class="short">${url.shortUrl}</div>
+                        <div class="url-stats">
+                            <div class="stat"><i class="fas fa-mouse"></i><span>${url.clicks} klik</span></div>
+                            <div class="stat"><i class="fas fa-calendar"></i><span>${new Date(url.createdAt).toLocaleDateString('id-ID')}</span></div>
+                        </div>
+                    </div>
+                    <div class="url-actions">
+                        <button class="action-btn copy-item-btn" data-url="${url.shortUrl}"><i class="fas fa-copy"></i></button>
+                        <button class="action-btn" onclick="testUrl('${url.id}')"><i class="fas fa-external-link-alt"></i></button>
+                        <button class="action-btn btn-warning delete-btn" data-id="${url.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.querySelectorAll('.copy-item-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const url = this.getAttribute('data-url');
+                    navigator.clipboard.writeText(url).then(() => {
+                        const originalHTML = this.innerHTML;
+                        this.innerHTML = '<i class="fas fa-check"></i>';
+                        setTimeout(() => this.innerHTML = originalHTML, 2000);
+                    });
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    if (confirm('Hapus URL ini?')) deleteUrl(id);
+                });
+            });
+        }
+
+        function deleteUrl(id) {
+            const urls = getUrls().filter(url => url.id !== id);
+            saveUrls(urls);
+            renderUrlList();
+            updateDashboard();
+        }
+
+        function testUrl(id) {
+            recordClick(id);
+            updateDashboard();
+            alert('Klik dicatat!');
+        }
+
+        function updateDashboard() {
+            const urls = getUrls();
+            const clicks = getClicks();
+            const analytics = getAnalytics();
+            
+            document.getElementById('totalUrls').textContent = urls.length;
+            document.getElementById('totalClicks').textContent = analytics.totalClicks?.toLocaleString() || '0';
+            document.getElementById('uniqueVisitors').textContent = analytics.uniqueVisitors?.toLocaleString() || '0';
+            document.getElementById('clickRate').textContent = analytics.clickRate || '0%';
+            
+            // Popular URLs
+            const popularUrlsContainer = document.getElementById('popularUrls');
+            const sortedUrls = [...urls].sort((a, b) => b.clicks - a.clicks).slice(0, 5);
+            popularUrlsContainer.innerHTML = sortedUrls.length === 0 ? 
+                '<p style="text-align:center; color:var(--gray); padding:1rem;">Belum ada URL</p>' :
+                sortedUrls.map(url => `
+                    <div class="url-item">
+                        <div class="url-info">
+                            <div class="original">${url.originalUrl}</div>
+                            <div class="short">${url.shortUrl}</div>
+                            <div class="url-stats">
+                                <div class="stat"><i class="fas fa-mouse"></i><span>${url.clicks} klik</span></div>
+                            </div>
+                        </div>
+                        <div class="url-actions">
+                            <button class="action-btn copy-item-btn" data-url="${url.shortUrl}"><i class="fas fa-copy"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            
+            // Click History
+            const clickHistoryTable = document.getElementById('clickHistoryTable');
+            const recentClicks = clicks.slice(0, 10);
+            clickHistoryTable.innerHTML = recentClicks.length === 0 ?
+                '<tr><td colspan="6" style="text-align:center; color:var(--gray); padding:1rem;">Belum ada data</td></tr>' :
+                recentClicks.map(click => {
+                    const url = urls.find(u => u.id === click.urlId);
+                    return `<tr>
+                        <td>${new Date(click.timestamp).toLocaleString('id-ID')}</td>
+                        <td>${url ? url.shortUrl : 'N/A'}</td>
+                        <td>${click.ip}</td>
+                        <td>${click.location}</td>
+                        <td><span class="badge badge-info">${click.device}</span></td>
+                        <td><span class="badge badge-success">${click.browser}</span></td>
+                    </tr>`;
+                }).join('');
+            
+            updateCharts();
+        }
+
+        function updateCharts() {
+            const analytics = getAnalytics();
+            
+            // Click Chart
+            if (clickChart) clickChart.destroy();
+            const clickCtx = document.getElementById('clickChart').getContext('2d');
+            clickChart = new Chart(clickCtx, {
+                type: 'line', data: {
+                    labels: ['6 Hari', '5 Hari', '4 Hari', '3 Hari', '2 Hari', 'Kemarin', 'Hari Ini'],
+                    datasets: [{
+                        data: analytics.clicksLast7Days || [0,0,0,0,0,0,0],
+                        borderColor: '#4361ee', backgroundColor: 'rgba(67,97,238,0.1)',
+                        borderWidth: 2, tension: 0.3, fill: true
+                    }]
+                }, options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+            
+            // Device Chart
+            if (deviceChart) deviceChart.destroy();
+            const deviceCtx = document.getElementById('deviceChart').getContext('2d');
+            deviceChart = new Chart(deviceCtx, {
+                type: 'doughnut', data: {
+                    labels: ['Mobile', 'Desktop', 'Tablet'],
+                    datasets: [{ data: [65, 25, 10], backgroundColor: ['#4361ee', '#4895ef', '#4cc9f0'] }]
+                }, options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // ==================== APP INITIALIZATION ====================
+        function initializeApp() {
+            generateDemoData();
+            renderUrlList();
+            updateDashboard();
+            
+            // Navigation
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+                    document.getElementById(this.getAttribute('data-target')).classList.add('active');
+                    if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('active');
+                });
+            });
+            
+            // Mobile Menu
+            document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
+            
+            // Shorten URL
+            document.getElementById('shorten-btn').addEventListener('click', function() {
+                const originalUrl = document.getElementById('original-url').value.trim();
+                const customSlug = document.getElementById('custom-slug').value.trim();
+                
+                if (!originalUrl) { alert('Masukkan URL!'); return; }
+                
+                try {
+                    const result = shortenUrl(originalUrl, customSlug);
+                    document.getElementById('short-url-output').value = result.shortUrl;
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('original-url').value = '';
+                    document.getElementById('custom-slug').value = '';
+                    renderUrlList();
+                    updateDashboard();
+                } catch (error) { alert('Error: ' + error.message); }
+            });
+            
+            // Copy Button
+            document.getElementById('copy-btn').addEventListener('click', function() {
+                const shortUrlInput = document.getElementById('short-url-output');
+                shortUrlInput.select();
+                navigator.clipboard.writeText(shortUrlInput.value).then(() => {
+                    const originalHTML = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-check"></i> Tersalin!';
+                    setTimeout(() => this.innerHTML = originalHTML, 2000);
+                });
+            });
+        }
+
+        // ==================== START APPLICATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            if (handleRedirect()) return;
+            
+            window.testUrl = testUrl;
+            window.shortenUrl = shortenUrl;
+            
+            if (checkAuth()) showApp(); else showLoginPage();
+            
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                if (login(username, password)) showApp(); else alert('Login gagal!');
+            });
+            
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        });
     </script>
 </body>
 </html>
