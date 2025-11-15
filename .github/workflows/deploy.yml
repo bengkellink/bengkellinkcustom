@@ -24,6 +24,7 @@ jobs:
         run: |
           echo "🌐 customlinkgue.abrdns.com" > URLS.txt
           echo "🚀 https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}" >> URLS.txt
+          echo "🔗 Custom Domain: https://customlinkgue.abrdns.com" >> URLS.txt
           echo "📅 Deployed: $(date)" >> URLS.txt
           
       - name: Upload artifact
@@ -34,3 +35,10 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        
+      - name: 📢 Post Deployment Info
+        run: |
+          echo "🎉 Deployment Successful!"
+          echo "🌐 Live URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          echo "🔗 Custom URL: https://customlinkgue.abrdns.com"
+          echo "🔗 WWW URL: https://www.customlinkgue.abrdns.com"
