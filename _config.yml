@@ -1,0 +1,14 @@
+include:
+  - ".html"
+  - ".css"
+  - ".js"
+  - ".png"
+  - ".jpg"
+  - ".jpeg"
+  - ".gif"
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+exclude:
+  - Gemfile
+  - Gemfile.lock
