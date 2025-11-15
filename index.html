@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bengkel Link - URL Shortener</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: #4361ee;
+            margin-bottom: 10px;
+        }
+        .success {
+            color: #10b981;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .test-links {
+            margin-top: 30px;
+            text-align: left;
+        }
+        .test-links a {
+            display: block;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #4361ee;
+            transition: background 0.3s;
+        }
+        .test-links a:hover {
+            background: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success">✅</div>
+        <h1>GitHub Pages WORK!</h1>
+        <p>Jika ini terlihat, berarti HTML berhasil di-render!</p>
+        
+        <div class="test-links">
+            <h3>Test URL Shortener:</h3>
+            <a href="?go=google">?go=google → Google.com</a>
+            <a href="?go=github">?go=github → GitHub.com</a>
+            <a href="?go=test">?go=test → Example.com</a>
+        </div>
+    </div>
+
+    <script>
+        // Simple redirect system
+        const urlParams = new URLSearchParams(window.location.search);
+        const slug = urlParams.get('go');
+        
+        const urlDatabase = {
+            'google': 'https://google.com',
+            'github': 'https://github.com', 
+            'test': 'https://example.com'
+        };
+        
+        if (slug && urlDatabase[slug]) {
+            window.location.href = urlDatabase[slug];
+        }
+    </script>
+</body>
+</html>
